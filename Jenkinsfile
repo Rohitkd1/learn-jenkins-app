@@ -13,6 +13,7 @@ pipeline {
             steps {
                 sh '''
                     echo "Lets start building"
+                    npm config set cache ./npm-cache --global
                     ls -la
                     node --version
                     npm --version
