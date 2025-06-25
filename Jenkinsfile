@@ -17,7 +17,7 @@ pipeline {
                     node --version
                     npm --version
                     npm ci
-                    npm runn build
+                    npm run build
                     ls -la
             }
         }
