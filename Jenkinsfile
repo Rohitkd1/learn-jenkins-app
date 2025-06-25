@@ -1,9 +1,12 @@
 pipeline {
     agent any 
 
+    environment {
+        HOME = "$" // Optional: helps npm avoid writing to /root or /.npm
+    }
+
     stages {
         stage('Build') {
-
             agent {
                 docker {
                     image 'node:18-alpine'
@@ -12,8 +15,6 @@ pipeline {
             }
             steps {
                 sh '''
-                    echo "Lets start building"
-                    npm config set cache ./npm-cache --global
                     ls -la
                     node --version
                     npm --version
