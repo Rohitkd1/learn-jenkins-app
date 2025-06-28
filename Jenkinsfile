@@ -36,7 +36,7 @@ pipeline {
                 sh '''
                     test -f build/index.html
                     npm test
-                    mkdir -p test-results
+                    
 
                 '''
             }
