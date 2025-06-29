@@ -2,12 +2,13 @@ pipeline {
     agent any
 
     environment {
-        HOME = "${WORKSPACE}"  // ✅ sets a safe, writable home for npm
+        HOME = "${WORKSPACE}"  // Prevent npm permission issues
     }
 
     stages {
+        
 
-        /*
+        
         stage('Build') {
             agent {
                 docker {
@@ -27,8 +28,10 @@ pipeline {
             }
         }
 
-        */
+        
 
+
+    stages {
         stage('Test') {
             agent {
                 docker {
@@ -38,10 +41,8 @@ pipeline {
             }
             steps {
                 sh '''
-                    #test -f build/index.html
+                    npm ci
                     npm test
-                    
-
                 '''
             }
         }
@@ -55,15 +56,15 @@ pipeline {
             }
             steps {
                 sh '''
-                    
+                    npm ci
                     npm install -g serve
-                    serve -s build
+                    serve -s build -l 5000 &   # Start server in background
+                    sleep 5
                     npx playwright test
                 '''
             }
         }
     }
-
 
     post {
         always {
