@@ -1,11 +1,8 @@
 pipeline {
     agent any
 
-    environment {
-        HOME = "${WORKSPACE}"  // Prevent npm permission issues
-    }
-
     stages {
+        /*
 
         stage('Build') {
             agent {
@@ -16,7 +13,7 @@ pipeline {
             }
             steps {
                 sh '''
-                    echo "Starting build"
+                    ls -la
                     node --version
                     npm --version
                     npm ci
@@ -25,6 +22,7 @@ pipeline {
                 '''
             }
         }
+        */
 
         stage('Test') {
             agent {
@@ -33,9 +31,10 @@ pipeline {
                     reuseNode true
                 }
             }
+
             steps {
                 sh '''
-                    npm ci
+                    #test -f build/index.html
                     npm test
                 '''
             }
@@ -44,16 +43,16 @@ pipeline {
         stage('E2E') {
             agent {
                 docker {
-                    image 'mcr.microsoft.com/playwright:v1.53.0-noble'
+                    image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
                     reuseNode true
                 }
             }
+
             steps {
                 sh '''
-                    npm ci
-                    npm install -g serve
-                    serve -s build -l 5000 &   # Start server in background
-                    sleep 5
+                    npm install serve
+                    node_modules/.bin/serve -s build &
+                    sleep 10
                     npx playwright test
                 '''
             }
@@ -62,7 +61,7 @@ pipeline {
 
     post {
         always {
-            junit 'test-results/junit.xml'
+            junit 'jest-results/junit.xml'
         }
     }
 }
