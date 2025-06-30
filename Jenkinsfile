@@ -11,7 +11,10 @@ pipeline {
             }
             steps {
                 sh '''
-                    echo "HI Nishitha"
+                    ls -la 
+                    node --version
+                    npm --version
+                    npm ci
                     
                 '''
             }
