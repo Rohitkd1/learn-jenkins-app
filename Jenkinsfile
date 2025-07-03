@@ -3,7 +3,6 @@ pipeline {
 
     stages {
         /*
-
         stage('Build') {
             agent {
                 docker {
@@ -34,8 +33,10 @@ pipeline {
 
             steps {
                 sh '''
+                    mkdir -p test-results
                     test -f build/index.html
                     npm test
+                    ls -lh test-results/
                 '''
             }
         }
@@ -62,6 +63,8 @@ pipeline {
 
     post {
         always {
+            echo 'Listing files to confirm junit output location:'
+            sh 'find . -type f'
             junit 'test-results/junit.xml'
         }
     }
