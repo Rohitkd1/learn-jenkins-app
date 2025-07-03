@@ -34,7 +34,7 @@ pipeline {
 
             steps {
                 sh '''
-                    #test -f build/index.html
+                    test -f build/index.html
                     npm test
                 '''
             }
@@ -51,6 +51,7 @@ pipeline {
             steps {
                 sh '''
                     npm install serve
+                    mkdir -p playwright-results
                     node_modules/.bin/serve -s build &
                     sleep 10
                     npx playwright test
