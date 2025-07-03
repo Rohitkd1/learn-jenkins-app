@@ -65,7 +65,7 @@ pipeline {
         always {
             echo 'Listing files to confirm junit output location:'
             sh 'find . -type f'
-            junit 'test-results/junit.xml'
+            junit 'jest-results/junit.xml'
         }
     }
 }
