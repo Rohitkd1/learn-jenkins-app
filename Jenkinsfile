@@ -94,28 +94,30 @@ pipeline {
                 '''
             }
         }
-    E2Estage('Prod E2E') {
-            agent {
-                docker {
-                    image 'mcr.microsoft.com/playwright:v1.53.1-jammy'
-                    reuseNode true
-                }
+stage('Prod E2E') {
+        agent {
+            docker {
+                image 'mcr.microsoft.com/playwright:v1.53.1-jammy'
+                reuseNode true
             }
+        }
 
-            environment {
-                CI_ENVIRONMENT_URL = "https://relaxed-taiyaki-c177b0.netlify.app"
-            }
+        environment {
+            CI_ENVIRONMENT_URL = "https://relaxed-taiyaki-c177b0.netlify.app"
+        }
 
-            steps {
-                sh '''
-                    npx playwright test  --reporter=html
-                '''
-            }
+        steps {
+            sh '''
+                npx playwright test  --reporter=html
+            '''
+        }
 
-            post {
+        post {
                 always {
                     publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E Report', reportTitles: '', useWrapperFileDirectly: true])
                 }
+            }
+        }
     }
 }
 
