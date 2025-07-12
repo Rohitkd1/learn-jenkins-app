@@ -97,7 +97,10 @@ pipeline {
 
         stage('Approve Staging') {
             steps {
-                input message: 'Do you want to proceed?', ok: 'Yes, please proceed'
+                timeout(time: 15, unit:'MINUTES'){
+                    input message: 'Do you want to proceed?', ok: 'Yes, please proceed'
+                }
+                
             }
         }
 
