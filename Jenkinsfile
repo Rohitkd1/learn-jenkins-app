@@ -69,14 +69,14 @@ pipeline {
 
                     post {
                         always {
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright Local', reportTitles: '', useWrapperFileDirectly: true])
                         }
                     }
                 }
             }
         }
 
-        stage('Deploy Staging') {
+        stage('Deploy staging') {
             agent {
                 docker {
                     image 'node:18-alpine'
@@ -87,25 +87,23 @@ pipeline {
                 sh '''
                     npm install netlify-cli@20.1.1
                     node_modules/.bin/netlify --version
-                    echo "Deploying to Production: ${NETLIFY_SITE_ID}"
-                    node_modules/.bin/netlify status 
-                    node_modules/.bin/netlify deploy --dir=build --prod
-                    
+                    echo "Deploying to staging. Site ID: $NETLIFY_SITE_ID"
+                    node_modules/.bin/netlify status
+                    node_modules/.bin/netlify deploy --dir=build --json > deploy-output.json
+                    node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
                 '''
             }
         }
 
-        stage('Approve Staging') {
+        stage('Approval') {
             steps {
-                timeout(time: 15, unit:'MINUTES'){
-                    input message: 'Do you want to proceed?', ok: 'Yes, please proceed'
+                timeout(time: 15, unit: 'MINUTES') {
+                    input message: 'Do you wish to deploy to production?', ok: 'Yes, I am sure!'
                 }
-                
             }
         }
 
-
-        stage('Deploy Prod') {
+        stage('Deploy prod') {
             agent {
                 docker {
                     image 'node:18-alpine'
@@ -116,38 +114,36 @@ pipeline {
                 sh '''
                     npm install netlify-cli@20.1.1
                     node_modules/.bin/netlify --version
-                    echo "Deploying to Production: ${NETLIFY_SITE_ID}"
-                    node_modules/.bin/netlify status 
+                    echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
+                    node_modules/.bin/netlify status
                     node_modules/.bin/netlify deploy --dir=build --prod
-                    
                 '''
             }
         }
-stage('Prod E2E') {
-        agent {
-            docker {
-                image 'mcr.microsoft.com/playwright:v1.53.1-jammy'
-                reuseNode true
+
+        stage('Prod E2E') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.53.1-jammy'
+                    reuseNode true
+                }
             }
-        }
 
-        environment {
-            CI_ENVIRONMENT_URL = "https://relaxed-taiyaki-c177b0.netlify.app"
-        }
+            environment {
+                CI_ENVIRONMENT_URL = 'https://relaxed-taiyaki-c177b0.netlify.app'
+            }
 
-        steps {
-            sh '''
-                npx playwright test  --reporter=html
-            '''
-        }
+            steps {
+                sh '''
+                    npx playwright test  --reporter=html
+                '''
+            }
 
-        post {
+            post {
                 always {
-                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E Report', reportTitles: '', useWrapperFileDirectly: true])
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E', reportTitles: '', useWrapperFileDirectly: true])
                 }
             }
         }
     }
 }
-
-
